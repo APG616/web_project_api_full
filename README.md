@@ -1,8 +1,8 @@
-# AroundB API 🚀
+# AroundB API(problemas con cuenta googlecloud, alguna alternativa?)
 
 API REST para una aplicación de tarjetas y perfiles de usuario, con autenticación JWT y base de datos MongoDB.
 
-## 📌 Características Principales
+## Características Principales
 
 - **Autenticación JWT** (registro/login)
 - **CRUD completo** para usuarios y tarjetas
@@ -29,7 +29,7 @@ API REST para una aplicación de tarjetas y perfiles de usuario, con autenticaci
 | Helmet          | Seguridad HTTP               |
 | express-rate-limit | Control de peticiones     |
 
-## 🔧 Instalación
+##  Instalación
 
 1. **Clonar el repositorio**:
    ```bash
@@ -74,7 +74,7 @@ backend/
 ├── logs/           # Archivos de registro
 └── app.js          # Entrada principal
 
-🌐 Endpoints Principales
+# Endpoints Principales
 Método	Ruta	Descripción	Autenticación
 POST	/signup	Registrar nuevo usuario	No
 POST	/signin	Iniciar sesión	No
@@ -84,7 +84,7 @@ GET	/cards	Obtener todas las tarjetas	Sí
 POST	/cards	Crear nueva tarjeta	Sí
 
 
-Sistema de Logging
+# Sistema de Logging
 
 Registra en 3 archivos diferentes:
 
@@ -106,7 +106,7 @@ json
   "path": "/api/users/123"
 }
 
-Manejo de Errores
+# Manejo de Errores
 
 Códigos de estado HTTP:
 
@@ -120,7 +120,7 @@ Códigos de estado HTTP:
 
     500 - Error interno del servidor
 
-Dependencias
+# Dependencias
 json
 
 "dependencies": {
