@@ -1,9 +1,10 @@
 class BadRequestError extends Error {
-  constructor(message) {
+  constructor(message = 'Datos de solicitud incorrectos', validationErrors = []) {
     super(message);
-    this.statusCode = 400; // Código de estado HTTP para Bad Request
-    
+    this.statusCode = 400;
+    this.name = 'BadRequestError';
+    this.validationErrors = validationErrors;
   }
 }
 
-module.exports = BadRequestError;
+module.exports = BadRequestError; // This should be the ONLY export

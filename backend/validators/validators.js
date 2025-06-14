@@ -1,26 +1,32 @@
 const { celebrate, Joi } = require('celebrate');
 const validator = require('validator');
 
-const validateURL = (value, helper) => {
-    if (validator.isURL(value)) {
-        return value;
-    }
-    return helpers.error('string.uri');
+const validateURL = (value, helpers) => {
+  if (!value) return value;
+  if (validator.isURL(value)) {
+    return value;
+  }
+  return helpers.error('string.uri');
 };
 
-module.exports.validateLogin = celebrate({
-    body: Joi.object().keys({
-        email: Joi.string().required().email(),
-        password: Joi.string().required().min(8),
-    }),
+const validateLogin = celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required().min(8)
+  })
 });
 
-module.exports.validateUserCreation = celebrate({
-    body: Joi.object().keys({
-        name: Joi.string().required().min(2).max(30),
-        about: Joi.string().required().min(2).max(30),
-        avatar: Joi.string().custom(validateURL, 'URL validation'),
-        email: Joi.string().required().email(),
-        password: Joi.string().required().min(8),
-    }),
+const validateUserCreation = celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required().min(8),
+    name: Joi.string().min(2).max(30).default('New User'),
+    about: Joi.string().min(2).max(30).default('Explorer'),
+    avatar: Joi.string().custom(validateURL).allow('').optional()
+  })
 });
+
+module.exports = {
+  validateLogin,
+  validateUserCreation
+};
