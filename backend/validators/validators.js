@@ -1,9 +1,10 @@
-const { celebrate, Joi } = require('celebrate');
-const validator = require('validator');
+import { celebrate, Joi } from 'celebrate';
+import validator from 'validator'; // Importa el módulo completo
+const { isURL } = validator; // Luego desestructura
 
 const validateURL = (value, helpers) => {
   if (!value) return value;
-  if (validator.isURL(value)) {
+  if (isURL(value)) {
     return value;
   }
   return helpers.error('string.uri');
@@ -26,7 +27,4 @@ const validateUserCreation = celebrate({
   })
 });
 
-module.exports = {
-  validateLogin,
-  validateUserCreation
-};
+export { validateLogin, validateUserCreation };

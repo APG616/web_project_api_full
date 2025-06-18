@@ -108,25 +108,32 @@ useEffect(() => {
 }, [loadData, handleLogout, Auth]); 
 
   useEffect(() => {
-    // Manejo de errores global
-    const handleUnhandledRejection = (event) => {
-      console.error("Unhandled rejection:", event.reason);
-      if (event.reason.message.includes("Failed to fetch")) {
-        setError("Error de conexión con el servidor");
-        setIsInfoTooltipOpen(true);
-        setIsSuccess(false);
-      }
-    };
+  const handleGlobalErrors = (event) => {
+    // Manejar errores de autofill
+    if (event.message?.includes('Cannot read properties of null')) {
+      console.warn('Advertencia de autofill:', event);
+      return;
+    }
+    
+    // Manejar errores de conexión
+    if (event.reason?.message?.includes('Failed to fetch')) {
+      setError("Error de conexión con el servidor");
+      setIsInfoTooltipOpen(true);
+      setIsSuccess(false);
+      return;
+    }
+    
+    console.error('Error no manejado:', event);
+  };
 
-    window.addEventListener("unhandledrejection", handleUnhandledRejection);
+  window.addEventListener('error', handleGlobalErrors);
+  window.addEventListener('unhandledrejection', handleGlobalErrors);
 
-    return () => {
-      window.removeEventListener(
-        "unhandledrejection",
-        handleUnhandledRejection
-      );
-    };
-  }, [setError, setIsInfoTooltipOpen, setIsSuccess]);
+  return () => {
+    window.removeEventListener('error', handleGlobalErrors);
+    window.removeEventListener('unhandledrejection', handleGlobalErrors);
+  };
+}, [setError, setIsInfoTooltipOpen, setIsSuccess]);
 
   function handleOpenPopup(type, title, children) {
     setPopup({

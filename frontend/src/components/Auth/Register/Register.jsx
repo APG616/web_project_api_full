@@ -23,26 +23,29 @@ export default function Register({ onRegister }) {
 
 const handleSubmit = async (e) => {
   e.preventDefault();
+  setError("");
+  
   if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-    setError("Por favor ingresa un email válido");
+    setError("Email inválido");
     return;
   }
+
   if (!formData.password || formData.password.length < 8) {
     setError("La contraseña debe tener al menos 8 caracteres");
     return;
   }
-    onRegister(formData.email, formData.password)
-      .then(() => {
-        setShowSuccessPopup(true);
-        setTimeout(() => {
-          navigate("/signin");
-        }, 2000);
-      })
-      .catch(() => {
-        setError("Error en el registro");
-        setShowErrorPopup(true);
-      });
-  };
+
+  try {
+    await onRegister(formData.email, formData.password);
+    setShowSuccessPopup(true);
+    setTimeout(() => navigate("/signin"), 2000);
+  } catch (err) {
+    setError(err.message.includes('already exists') 
+      ? "Este email ya está registrado. ¿Quieres iniciar sesión?"
+      : "Error en el registro. Intenta nuevamente.");
+    setShowErrorPopup(true);
+  }
+};
 
   const closeAllPopups = () => {
     setShowSuccessPopup(false);

@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
-const validator = require('validator');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+import mongoose from 'mongoose';
+import validator from 'validator';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
     },
     avatar: {
         type: String,
-        default:'https://pictures.s3.yandex.net/resources/avatar_1604080799.jpg',
+        default: 'https://pictures.s3.yandex.net/resources/avatar_1604080799.jpg',
         validate: {
             validator: (v) => validator.isURL(v),
             message: 'URL inválida',
@@ -41,23 +41,24 @@ const userSchema = new mongoose.Schema({
     },
 });
 
-
+// Método para buscar usuario por credenciales
 userSchema.statics.findUserByCredentials = function (email, password) {
-  return this.findOne({ email }).select('+password')
-    .then((user) => {
-      if (!user) {
-        return Promise.reject(new Error('Credenciales incorrectas'));
-      }
-      return bcrypt.compare(password, user.password)
-        .then((matched) => {
-          if (!matched) {
-            return Promise.reject(new Error('Credenciales incorrectas'));
-          }
-          return user;
+    return this.findOne({ email }).select('+password')
+        .then((user) => {
+            if (!user) {
+                return Promise.reject(new Error('Credenciales incorrectas'));
+            }
+            return bcrypt.compare(password, user.password)
+                .then((matched) => {
+                    if (!matched) {
+                        return Promise.reject(new Error('Credenciales incorrectas'));
+                    }
+                    return user;
+                });
         });
-    });
 };
 
+// Método para generar token
 userSchema.methods.generateAuthToken = function () {
     const token = jwt.sign(
         { _id: this._id },
@@ -67,4 +68,11 @@ userSchema.methods.generateAuthToken = function () {
     return token;
 };
 
-module.exports = mongoose.model('user', userSchema);
+// Exporta el modelo y los métodos necesarios
+export const User = mongoose.model('user', userSchema);
+
+// Exporta métodos adicionales (opcional, si los necesitas directamente)
+export const create = (userData) => User.create(userData);
+export const findById = (id) => User.findById(id);
+export const findUserByCredentials = (email, password) => 
+    User.findUserByCredentials(email, password);

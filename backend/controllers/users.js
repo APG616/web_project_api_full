@@ -1,12 +1,12 @@
-const User = require('../models/user');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const BadRequestError = require('../errors/bad-request-error');
-
-const ConflictError = require('../errors/conflict-error');
-const UnauthorizedError = require('../errors/unauthorized-error');
-const NotFoundError = require('../errors/not-found-error');
-const { celebrate, Joi } = require('celebrate');
+import { create, findUserByCredentials, findById } from '../models/user.js';
+import { hash as _hash } from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+const { sign } = jwt;
+import BadRequestError from '../errors/bad-request-error.js';
+import ConflictError from '../errors/conflict-error.js';
+import UnauthorizedError from '../errors/unauthorized-error.js';
+import NotFoundError from '../errors/not-found-error.js';
+import { celebrate, Joi } from 'celebrate';
 
 const validateUserCreation = celebrate({
   body: Joi.object().keys({
@@ -18,14 +18,14 @@ const validateUserCreation = celebrate({
   })
 });
 
-module.exports.createUser = (req, res, next) => {
-   const { email, password, name = 'New User', about = 'Explorer', avatar } = req.body;
+export function createUser(req, res, next) {
+  const { email, password, name = 'New User', about = 'Explorer', avatar } = req.body;
 
-  bcrypt.hash(password, 10)
-    .then((hash) => User.create({ 
+  _hash(password, 10)
+    .then((hash) => create({ 
       name, 
       about, 
-      avatar: avatar || undefined, // Send undefined if empty
+      avatar: avatar || undefined,
       email, 
       password: hash 
     }))
@@ -51,16 +51,16 @@ module.exports.createUser = (req, res, next) => {
         next(err);
       }
     });
-};
+}
 
-module.exports.login = (req, res, next) => {
+
+export function login(req, res, next) {
   const { email, password } = req.body;
   
-  User.findUserByCredentials(email, password)
+  findUserByCredentials(email, password)
     .then((user) => {
-      // Add logging to verify user found
       console.log('User found:', user.email); 
-      const token = jwt.sign(
+      const token = sign(
         { _id: user._id },
         process.env.JWT_SECRET || 'dev-secret',
         { expiresIn: '7d' }
@@ -68,13 +68,13 @@ module.exports.login = (req, res, next) => {
       res.send({ token });
     })
     .catch((err) => {
-      console.error('Login error:', err); // Add detailed logging
+      console.error('Login error:', err);
       next(new UnauthorizedError('Correo electrónico o contraseña incorrectos'));
     });
-};
+}
 
-module.exports.getCurrentUser = (req, res, next) => {
-    User.findById(req.user._id)
+export function getCurrentUser(req, res, next) {
+    findById(req.user._id)
         .then((user) => {
             if (!user) {
                 throw new NotFoundError('Usuario no encontrado');
@@ -82,4 +82,5 @@ module.exports.getCurrentUser = (req, res, next) => {
             res.send(user);
         })
         .catch(next);
-};
+}
+

@@ -43,26 +43,29 @@ async signin(email, password) {
   try {
     const response = await fetch(`${BASE_URL}/signin`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      }, // Don't include Authorization header for login
+      headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      credentials: 'include', // Importante para CORS con credenciales
       body: JSON.stringify({ email, password })
     });
-    
+
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Login API error:', errorData);
-      throw new Error(errorData.message || 'Correo electrónico o contraseña incorrectos');
+      const errorData = await response.json().catch(() => ({}));
+      const errorMsg = errorData.message || 
+        (response.status === 401 ? 'Credenciales incorrectas' : 'Error en el servidor');
+      throw new Error(errorMsg);
     }
-    
+
     const data = await response.json();
     if (!data.token) {
       throw new Error('No se recibió token de autenticación');
     }
     return data;
   } catch (error) {
-    console.error('Signin error:', error);
-    throw error;
+    console.error('Signin failed:', error);
+    throw new Error(error.message || 'Error de conexión. Verifica tu red e intenta nuevamente.');
   }
 }
 
@@ -70,27 +73,31 @@ async signup(email, password) {
   try {
     const response = await fetch(`${BASE_URL}/signup`, {
       method: 'POST',
-      headers: this._getHeaders(),
+      headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
       body: JSON.stringify({
         email,
         password,
-        name: 'New User',    // Default value
-        about: 'Explorer',   // Default value
-        avatar: undefined    // Send undefined instead of empty string
+        name: 'New User',
+        about: 'Explorer',
+        avatar: undefined
       })
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      // Enhanced error message with validation details if available
-      const errorMsg = errorData.message || 
-                      (errorData.errors ? JSON.stringify(errorData.errors) : 'Registration failed');
-      throw new Error(errorMsg);
+      // Manejo específico para email existente
+      if (errorData.message.includes('already exists')) {
+        throw new Error('Este email ya está registrado');
+      }
+      throw new Error(errorData.message || 'Error en el registro');
     }
 
     return await response.json();
   } catch (error) {
-    console.error('Signup error:', error);
+    console.error('Signup failed:', error);
     throw error;
   }
 }

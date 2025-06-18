@@ -1,7 +1,8 @@
-const mongoose = require('mongoose');
-const validator = require('validator');
+import { Schema, model } from 'mongoose';
+import validator from 'validator'; // Importa el módulo completo
+const { isURL } = validator; 
 
-const cardSchema = new mongoose.Schema({
+const cardSchema = new Schema({
     name: {
         type: String,
         required: true,
@@ -12,18 +13,17 @@ const cardSchema = new mongoose.Schema({
         type: String,
         required: true,
         validate: {
-            validator: (v) => validator.isURL(v),
+            validator: (v) => isURL(v),
             message: 'URL inválida',
         },
     },
     owner: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'user',
         required: true,
     },
     likes: [{
         type: Boolean,
-        ref: 'user',
         default: false,
     }],
     createdAt: {
@@ -32,4 +32,13 @@ const cardSchema = new mongoose.Schema({
     },
 });
 
-module.exports = mongoose.model('card', cardSchema);
+const Card = model('Card', cardSchema);
+
+export const find = (query) => Card.find(query);
+export const create = (data) => Card.create(data);
+export const findById = (id) => Card.findById(id);
+export const findByIdAndRemove = (id) => Card.findByIdAndRemove(id);
+export const findByIdAndUpdate = (id, update, options) => Card.findByIdAndUpdate(id, update, options);
+
+
+export default Card;

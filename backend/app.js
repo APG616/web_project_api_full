@@ -1,34 +1,44 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const { errors } = require('celebrate');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const { requestLogger, errorLogger } = require('./middleware/logger'); // Cambio importante aquí
-const auth = require('./middleware/auth');
-const { createUser, login } = require('./controllers/users');
-const BadRequestError = require('./errors/bad-request-error');
-const { validateLogin, validateUserCreation } = require('./validators/validators');
-const NotFoundError = require('./errors/not-found-error');
-const errorHandler = require('./middleware/error-handler');
-const { celebrate, Joi } = require('celebrate');
+// app.js
+import express from 'express';
+import { connect } from 'mongoose';
+import bodyParser from 'body-parser'; 
+const { json, urlencoded } = bodyParser; 
+import cors from 'cors';
+import { errors } from 'celebrate';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import { requestLogger, errorLogger } from './middleware/logger.js';
+import auth from './middleware/auth.js';
+import { createUser, login } from './controllers/users.js';
+import userRoutes from './routes/users.js';
+import cardRoutes from './routes/cards.js';
+import BadRequestError from './errors/bad-request-error.js';
+import NotFoundError from './errors/not-found-error.js';
+import errorHandler from './middleware/error-handler.js';
+import { validateLogin, validateUserCreation } from './validators/validators.js';
+import { celebrate, Joi } from 'celebrate';
+
 const app = express();
 
 // 1. Configuración de seguridad
 app.use(helmet());
 
+app.use(cors({
+  origin: 'http://localhost:3001', // URL de tu frontend
+  credentials: true,
+}));
 // 2. Configuración CORS
 const corsOptions = {
   origin: [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
     'http://localhost:3000',
-    'http://localhost:3001' // Add this
+    'http://localhost:3001'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  exposedHeaders: ['Authorization']
 };
 
 app.use(cors(corsOptions));
@@ -45,30 +55,32 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// 5. Body parsing
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(errors()); // Manejo de errores de Celebrate
 
-// Rutas públicas
+//Body parsing
+app.use(json());
+app.use(urlencoded({ extended: true }));
+
+// Rutas públicas - DEBEN estar antes de app.use(auth)
 app.post('/signup', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required().min(8),
-    name: Joi.string().min(2).max(30).default('New User'),
-    about: Joi.string().min(2).max(30).default('Explorer'), 
-    avatar: Joi.string().uri().optional()
   })
 }), (req, res, next) => {
-  console.log('Signup request received:', req.body);
+  console.log('Signup body:', req.body);
   createUser(req, res, next);
 });
 
 app.post('/signin', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
-    password: Joi.string().required().min(8)
+    password: Joi.string().required()
   })
-}), login);
+}), (req, res, next) => {
+  console.log('Signin attempt:', req.body.email);
+  login(req, res, next);
+});
 
 // Ruta de prueba
 app.get('/crash-test', () => {
@@ -79,8 +91,8 @@ app.get('/crash-test', () => {
 
 // Rutas protegidas
 app.use(auth);
-app.use('/users', require('./routes/users'));
-app.use('/cards', require('./routes/cards'));
+app.use('/users', userRoutes);
+app.use('/cards', cardRoutes);
 
 // Manejo de errores (DESPUÉS de las rutas)
 app.use(errorLogger); // Logger de errores HTTP
@@ -97,7 +109,7 @@ app.use((req, res, next) => {
 });
 
 // Conexión a MongoDB
-mongoose.connect('mongodb://127.0.0.1:27017/aroundb')
+connect('mongodb://127.0.0.1:27017/aroundb')
   .then(() => console.log('✅ Conectado a MongoDB'))
   .catch(err => {
     console.error('❌ Error MongoDB:', err.message);

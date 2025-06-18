@@ -1,7 +1,13 @@
-const winston = require('winston');
-const expressWinston = require('express-winston');
-const path = require('path');
-const fs = require('fs');
+// backend/middleware/logger.js
+import winston from 'winston';
+import expressWinston from 'express-winston';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 
 // Configuración común de formatos
 const { combine, timestamp, printf, json, prettyPrint } = winston.format;
@@ -75,14 +81,9 @@ const appLogger = winston.createLogger({
   ]
 });
 
-module.exports = {
+// Cambia module.exports por export default
+export {
   requestLogger,
   errorLogger,
-  logError: (error) => {
-    appLogger.error({
-      message: error.message || 'Error desconocido',
-      stack: error.stack,
-      ...error
-    });
-  }
+  appLogger,
 };

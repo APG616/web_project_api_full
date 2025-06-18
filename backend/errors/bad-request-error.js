@@ -7,4 +7,4 @@ class BadRequestError extends Error {
   }
 }
 
-module.exports = BadRequestError; // This should be the ONLY export
+export default BadRequestError; // This should be the ONLY export

@@ -18,20 +18,21 @@ const handleSubmit = async (e) => {
   e.preventDefault();
   setError("");
   
-  // Basic validation
   if (!formData.email || !formData.email.includes('@')) {
-    setError("Por favor ingresa un email válido");
+    setError("Email inválido");
     return;
   }
   if (!formData.password) {
-    setError("Por favor ingresa tu contraseña");
+    setError("Ingresa tu contraseña");
     return;
   }
 
   try {
     await onLogin(formData.email, formData.password);
   } catch (err) {
-    setError(err.message || "Error al iniciar sesión");
+    setError(err.message.includes('fetch') 
+      ? "Error de conexión con el servidor"
+      : err.message);
   }
 };
 
@@ -40,28 +41,30 @@ const handleSubmit = async (e) => {
       <h2 className="auth__title">Iniciar sesión</h2>
       {/* eslint-disable-next-line no-undef */}
       {error && <p className="auth__error">{error}</p>}
-      <form className="auth__form" onSubmit={handleSubmit} noValidate>
-        <input
-          className="auth__input"
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          placeholder="Correo electrónico"
-          autoComplete="username"
-          required
-        />
-        <input
-          className="auth__input"
-          type="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          placeholder="Contraseña"
-          required
-          minLength="4"
-          autoComplete="current-password"
-        />
+      <form className="auth__form" onSubmit={handleSubmit} autoComplete="on">
+  <input
+    className="auth__input"
+    type="email"
+    name="email"
+    id="login-email" // Añadir ID único
+    value={formData.email}
+    onChange={handleChange}
+    placeholder="Correo electrónico"
+    autoComplete="username email" // Mejorado
+    required
+  />
+  <input
+    className="auth__input"
+    type="password"
+    name="password"
+    id="login-password" // Añadir ID único
+    value={formData.password}
+    onChange={handleChange}
+    placeholder="Contraseña"
+    required
+    minLength="4"
+    autoComplete="current-password" // Mejorado
+  />
         {/* eslint-disable-next-line no-undef*/}
         <button className="auth__button" type="submit">
           Iniciar sesión
