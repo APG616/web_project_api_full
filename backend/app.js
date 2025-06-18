@@ -42,6 +42,12 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+// Después de app.use(cors(corsOptions));
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  next();
+});
 app.options('*', cors(corsOptions));
 
 // 3. Logging de solicitudes (DEBE estar antes de las rutas)

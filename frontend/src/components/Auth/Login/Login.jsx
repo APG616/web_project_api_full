@@ -46,30 +46,31 @@ const handleSubmit = async (e) => {
     className="auth__input"
     type="email"
     name="email"
-    id="login-email" // Añadir ID único
+    id="login-email"
     value={formData.email}
     onChange={handleChange}
     placeholder="Correo electrónico"
-    autoComplete="username email" // Mejorado
+    autoComplete="username"
     required
+    aria-label="Correo electrónico"
   />
   <input
     className="auth__input"
     type="password"
     name="password"
-    id="login-password" // Añadir ID único
+    id="login-password"
     value={formData.password}
     onChange={handleChange}
     placeholder="Contraseña"
     required
     minLength="4"
-    autoComplete="current-password" // Mejorado
+    autoComplete="current-password"
+    aria-label="Contraseña"
   />
-        {/* eslint-disable-next-line no-undef*/}
-        <button className="auth__button" type="submit">
-          Iniciar sesión
-        </button>
-      </form>
+  <button className="auth__button" type="submit">
+    Iniciar sesión
+  </button>
+</form>
       <p className="auth__link">
         ¿Aún no eres miembro?
         <Link className="auth__link-text" to="/signup">

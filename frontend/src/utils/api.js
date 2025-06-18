@@ -47,25 +47,36 @@ async signin(email, password) {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
-      credentials: 'include', // Importante para CORS con credenciales
+      credentials: 'include', // Necesario para CORS con credenciales
       body: JSON.stringify({ email, password })
     });
 
+    // Verificación adicional de la respuesta
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      const errorMsg = errorData.message || 
-        (response.status === 401 ? 'Credenciales incorrectas' : 'Error en el servidor');
-      throw new Error(errorMsg);
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch {
+        errorData = { message: 'Error desconocido' };
+      }
+      
+      throw new Error(errorData.message || `Error HTTP: ${response.status}`);
     }
 
     const data = await response.json();
+    
+    // Verificación del token
     if (!data.token) {
-      throw new Error('No se recibió token de autenticación');
+      throw new Error('La respuesta no incluyó un token de autenticación');
     }
+    
     return data;
   } catch (error) {
-    console.error('Signin failed:', error);
-    throw new Error(error.message || 'Error de conexión. Verifica tu red e intenta nuevamente.');
+    console.error('Error en signin:', {
+      error: error.message,
+      stack: error.stack
+    });
+    throw new Error(error.message || 'Error de conexión. Verifica:');
   }
 }
 

@@ -109,15 +109,15 @@ useEffect(() => {
 
   useEffect(() => {
   const handleGlobalErrors = (event) => {
-    // Manejar errores de autofill
-    if (event.message?.includes('Cannot read properties of null')) {
-      console.warn('Advertencia de autofill:', event);
+    // Ignorar errores específicos de autofill
+    if (event.message?.includes('bootstrap-autofill-overlay-notifications')) {
       return;
     }
     
     // Manejar errores de conexión
     if (event.reason?.message?.includes('Failed to fetch')) {
-      setError("Error de conexión con el servidor");
+      console.error('Error de conexión detectado:', event.reason);
+      setError("No se pudo conectar al servidor. Verifica tu conexión a internet.");
       setIsInfoTooltipOpen(true);
       setIsSuccess(false);
       return;
