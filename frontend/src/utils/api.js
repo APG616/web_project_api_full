@@ -1,5 +1,8 @@
 //api.js
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+if (!BASE_URL) {
+  console.error('BASE_URL no está definido correctamente');
+}
 
 class Api {
     constructor() {
@@ -41,7 +44,10 @@ class Api {
 
 async signin(email, password) {
   try {
-    const response = await fetch(`${BASE_URL}/signin`, {
+    const url = `${BASE_URL}/signin`;
+    console.log('Attempting to sign in to:', url);
+    
+    const response = await fetch(url, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
@@ -50,20 +56,17 @@ async signin(email, password) {
       credentials: 'include', // Necesario para CORS con credenciales
       body: JSON.stringify({ email, password })
     });
+    console.log('Response status:', response.status);
 
     // Verificación adicional de la respuesta
     if (!response.ok) {
-      let errorData;
-      try {
-        errorData = await response.json();
-      } catch {
-        errorData = { message: 'Error desconocido' };
-      }
-      
-      throw new Error(errorData.message || `Error HTTP: ${response.status}`);
+      const errorText = await response.text();
+      console.error('Error response:', errorText);
+      throw new Error(errorText || `Error HTTP: ${response.status}`);
     }
 
     const data = await response.json();
+    console.log('login successful, received data:', data);
     
     // Verificación del token
     if (!data.token) {
@@ -74,7 +77,8 @@ async signin(email, password) {
   } catch (error) {
     console.error('Error en signin:', {
       error: error.message,
-      stack: error.stack
+      stack: error.stack,
+      type: error.name
     });
     throw new Error(error.message || 'Error de conexión. Verifica:');
   }
@@ -88,27 +92,29 @@ async signup(email, password) {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
+      credentials: 'include', // Necesario para CORS con credenciales
       body: JSON.stringify({
         email,
         password,
         name: 'New User',
         about: 'Explorer',
-        avatar: undefined
       })
     });
 
     if (!response.ok) {
       const errorData = await response.json();
+      console.log('Error en signup:', errorData);
       // Manejo específico para email existente
-      if (errorData.message.includes('already exists')) {
+      if (errorData.message.includes('ya existe')) {
         throw new Error('Este email ya está registrado');
       }
       throw new Error(errorData.message || 'Error en el registro');
     }
-
-    return await response.json();
+    const data = await response.json();
+    console.log('Signup exitoso, datos recibidos:', data);
+    return data;
   } catch (error) {
-    console.error('Signup failed:', error);
+    console.error('Signup fallido:', error);
     throw error;
   }
 }

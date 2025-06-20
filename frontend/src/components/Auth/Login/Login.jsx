@@ -41,7 +41,7 @@ const handleSubmit = async (e) => {
       <h2 className="auth__title">Iniciar sesión</h2>
       {/* eslint-disable-next-line no-undef */}
       {error && <p className="auth__error">{error}</p>}
-      <form className="auth__form" onSubmit={handleSubmit} autoComplete="on">
+      <form className="auth__form" onSubmit={handleSubmit} autoComplete="on" data-lpignore="true" data-form-type="login">
   <input
     className="auth__input"
     type="email"
@@ -50,9 +50,10 @@ const handleSubmit = async (e) => {
     value={formData.email}
     onChange={handleChange}
     placeholder="Correo electrónico"
-    autoComplete="username"
+    autoComplete="username email"
     required
     aria-label="Correo electrónico"
+    data-lpignore="true"
   />
   <input
     className="auth__input"
@@ -63,9 +64,10 @@ const handleSubmit = async (e) => {
     onChange={handleChange}
     placeholder="Contraseña"
     required
-    minLength="4"
+    minLength="8"
     autoComplete="current-password"
     aria-label="Contraseña"
+    data-lpignore="true"
   />
   <button className="auth__button" type="submit">
     Iniciar sesión

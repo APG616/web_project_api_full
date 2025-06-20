@@ -9,7 +9,7 @@ import {
   Navigate,
   useLocation,
 } from "react-router-dom";
-import api from "../utils/api";
+import api from "../utils/api.js";
 import Auth from "../utils/auth";
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
 import Footer from "./Footer/Footer";
@@ -43,6 +43,7 @@ export default function App() {
 
 const handleLogin = async (email, password) => {
   try {
+    console.log('Attempting login with:', email);
     const data = await api.signin(email, password);
     Auth.login(data.token);
     setEmail(email);

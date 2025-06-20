@@ -40,9 +40,16 @@ const handleSubmit = async (e) => {
     setShowSuccessPopup(true);
     setTimeout(() => navigate("/signin"), 2000);
   } catch (err) {
-    setError(err.message.includes('already exists') 
-      ? "Este email ya está registrado. ¿Quieres iniciar sesión?"
-      : "Error en el registro. Intenta nuevamente.");
+    console.error('Detalles de error en Registro:', err);
+    let errorMessage = "Error en el registro";
+    if (err.message.includes('fetch')) {
+      errorMessage = "Error de conexión con el servidor";
+    } else if (err.message.includes('Validation failed')) {
+      errorMessage = "Datos inválidos. Verifica tu email y contraseña (mínimo 8 caracteres).";
+    } else if (err.message.includes('already exists')) {
+      errorMessage = "Este email ya está registrado";
+    }
+    setError(errorMessage);
     setShowErrorPopup(true);
   }
 };

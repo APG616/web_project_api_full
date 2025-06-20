@@ -23,32 +23,22 @@ const app = express();
 // 1. Configuración de seguridad
 app.use(helmet());
 
-app.use(cors({
-  origin: 'http://localhost:3001', // URL de tu frontend
-  credentials: true,
-}));
-// 2. Configuración CORS
 const corsOptions = {
   origin: [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
+    'http://localhost:5127',
     'http://localhost:3000',
     'http://localhost:3001'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
-  exposedHeaders: ['Authorization']
+  exposedHeaders: ['Authorization', 'Set-Cookie'],
 };
 
 app.use(cors(corsOptions));
-// Después de app.use(cors(corsOptions));
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  next();
-});
-app.options('*', cors(corsOptions));
+
 
 // 3. Logging de solicitudes (DEBE estar antes de las rutas)
 app.use(requestLogger);
@@ -72,6 +62,9 @@ app.post('/signup', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required().min(8),
+    name: Joi.string().optional().min(2).max(30),
+    about: Joi.string().optional().min(2).max(30),
+    avatar: Joi.string().optional().uri()
   })
 }), (req, res, next) => {
   console.log('Signup body:', req.body);

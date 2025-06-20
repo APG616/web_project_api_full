@@ -7,7 +7,15 @@ import path from "path";
 export default defineConfig({
   plugins: [react()],
 server: {
-  port: 5173 // Usa el puerto default de Vite
+  proxy: {
+    "/api": {
+      target: "http://localhost:3001", // Cambia esto al puerto de tu backend
+      changeOrigin: true,
+      rewrite: (path) => path.replace(/^\/api/, ""),
+    },
+  },
+  port: 5173, // Usa el puerto default de Vite
+  strictPort: true, // Asegura que el puerto sea el mismo siempre
 },
   resolve: {
     alias: {
